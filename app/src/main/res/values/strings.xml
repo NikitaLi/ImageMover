@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ImageMover</string>
-    <string name="start_button_text">Start</string>
+    <string name="button_text_start">Start</string>
+    <string name="button_text_select_fragment_5">Select fragment 5</string>
 </resources>
