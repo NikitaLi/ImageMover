@@ -7,19 +7,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1.25"
-        android:baselineAligned="false">
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/btnBorder5"
-            android:text="@string/button_text_select_fragment_5"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:baselineAligned="false">
