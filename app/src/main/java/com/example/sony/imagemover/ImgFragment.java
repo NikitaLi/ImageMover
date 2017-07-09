@@ -1,12 +1,9 @@
 package com.example.sony.imagemover;
 
-import android.app.FragmentManager;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +12,10 @@ import android.widget.LinearLayout;
 
 public class ImgFragment extends Fragment implements View.OnClickListener {
 
-    private static final String ARG_ID = "id";
+    private final String ARG_ID = "id";
 
-    private boolean isSelected = false;
-    private int cur_img_id = 0;
+    private boolean mIsSelected = false;
+    int mCurImgId = 0;
 
     private LinearLayout mLinearLayout;
     private ImageView mImageView;
@@ -38,74 +35,83 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
         mLinearLayout = (LinearLayout) inflateView.findViewById(R.id.background);
 
         mImageView = (ImageView) inflateView.findViewById(R.id.this_image);
-        Drawable img = getImageByID(getArguments().getInt(ARG_ID));
-        mImageView.setImageDrawable(img);
+        int img = getImageByID(getCurrentFragmentId());
+        mImageView.setImageResource(img);
         mImageView.setOnClickListener(this);
         return inflateView;
     }
 
+    // TODO: разнести
     @Override
     public void onClick(View view) {
 
-        int currentFragmentId = getArguments().getInt(ARG_ID);
+        int currentFragmentId = getCurrentFragmentId();
 
-        if (isSelected) {
+        if (mIsSelected) {
             deselect();
-            Activity2.prevImgID = 0;
+            Mover.sPrevImgID = 0;
         } else {
             select();
-            if (Activity2.prevImgID == 0) {
-                Activity2.prevImgID = currentFragmentId;
-            }
-            else {
-                if (cur_img_id == 0) {
-                    cur_img_id = currentFragmentId;
+            if (Mover.sPrevImgID == 0) {
+                Mover.sPrevImgID = currentFragmentId;
+            } else {
+                if (mCurImgId == 0) {
+                    mCurImgId = currentFragmentId;
                 }
 
-                FragmentManager mFragmentManager = getFragmentManager();
-                ImgFragment prevFragment = (ImgFragment) mFragmentManager.findFragmentByTag(Integer.toString(Activity2.prevImgID));
+                Activity2 act2 = (Activity2) getActivity();
+                ImgFragment prevFragment = act2.getPreviousFragment();
 
                 int previous_img_id;
-                if (prevFragment.cur_img_id == 0) {
-                    previous_img_id = Activity2.prevImgID;
+                if (prevFragment.mCurImgId == 0) {
+                    previous_img_id = Mover.sPrevImgID;
+                } else {
+                    previous_img_id = prevFragment.mCurImgId;
                 }
-                else {
-                    previous_img_id = prevFragment.cur_img_id;
-                }
 
-                Drawable imgPrevious = getImageByID(previous_img_id);
-                Drawable imgCurrent = getImageByID(cur_img_id);
+                int imgPrevious = getImageByID(previous_img_id);
+                int imgCurrent = getImageByID(mCurImgId);
 
-                mImageView.setImageDrawable(imgPrevious);
+                mImageView.setImageResource(imgPrevious);
 
-                prevFragment.mImageView.setImageDrawable(imgCurrent);
-                prevFragment.cur_img_id = cur_img_id;
+                prevFragment.mImageView.setImageResource(imgCurrent);
+                prevFragment.mCurImgId = mCurImgId;
                 prevFragment.deselect();
-
                 deselect();
-                cur_img_id = previous_img_id;
-                Activity2.prevImgID = 0;
+
+                Mover.sMovesCount++;
+                Mover.saveToMovingHistory(Mover.sMovesCount, Mover.sPrevImgID, currentFragmentId);
+
+                mCurImgId = previous_img_id;
+                Mover.sPrevImgID = 0;
             }
         }
     }
 
-    public Drawable getImageByID(int ID) {
-        return ResourcesCompat.getDrawable(getResources(), getResources()
-                        .getIdentifier(
-                                "img"+ID,
-                                "drawable",
-                                MainActivity.PACKAGE_NAME),
-                null
-        );
+    public int getCurrentFragmentId() {
+        return getArguments().getInt(ARG_ID);
     }
 
     public void select() {
         mLinearLayout.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary));
-        isSelected = true;
+        mIsSelected = true;
     }
 
     public void deselect() {
         mLinearLayout.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorTransparent));
-        isSelected = false;
+        mIsSelected = false;
+    }
+
+    // TODO: унести в Utils
+    public int getImageByID(int id) {
+        return getResources()
+                .getIdentifier(
+                        "img" + id,
+                        "drawable",
+                        getActivity().getPackageName());
+    }
+
+    public void setScaleTypeForImage(String scaleType) {
+        mImageView.setScaleType(ImageView.ScaleType.valueOf(scaleType));
     }
 }
