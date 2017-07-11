@@ -1,6 +1,7 @@
 package com.example.sony.imagemover;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -9,11 +10,15 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     
     Button mBtnStart;
-    TextView mHistoryOfMoves;
+    TextView mTextViewHistoryOfMoves;
+
+    SharedPreferences sPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +28,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBtnStart = (Button) findViewById(R.id.goToActivity2);
         mBtnStart.setOnClickListener(this);
 
-        mHistoryOfMoves = (TextView) findViewById(R.id.log);
-        mHistoryOfMoves.setMovementMethod(new ScrollingMovementMethod());
+        mTextViewHistoryOfMoves = (TextView) findViewById(R.id.log);
+        mTextViewHistoryOfMoves.setMovementMethod(new ScrollingMovementMethod());
+        clearPreferences();
     }
 
     @Override
@@ -39,13 +45,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         String historyInString = "";
         if (data != null) {
-            ArrayList<MoveInfo> log = data.getExtras().getParcelableArrayList("history");
+            sPref = getSharedPreferences("myPref", MODE_PRIVATE);
+            Set<String> set = sPref.getStringSet("moving_history", null);
+            List<String> log = new ArrayList<>(set);
             if (log != null) {
-                for (MoveInfo i : log) {
-                    historyInString += i.mMoveInfo + "\n";
+                for (String i : log) {
+                    historyInString += i + "\n";
                 }
             }
         }
-        mHistoryOfMoves.setText(historyInString);
+        mTextViewHistoryOfMoves.setText(historyInString);
+    }
+
+    void clearPreferences() {
+        sPref = getSharedPreferences("myPref", MODE_PRIVATE);
+        SharedPreferences.Editor ed = sPref.edit();
+        ed.clear();
+        ed.apply();
     }
 }

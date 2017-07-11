@@ -45,26 +45,28 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
 
+        Activity2 act2 = (Activity2) getActivity();
+
         int currentFragmentId = getCurrentFragmentId();
 
         if (mIsSelected) {
             deselect();
-            Mover.sPrevImgID = 0;
+            act2.saveText(act2.PREV_IMG_ID, 0);
         } else {
             select();
-            if (Mover.sPrevImgID == 0) {
-                Mover.sPrevImgID = currentFragmentId;
+            if (act2.loadText(act2.PREV_IMG_ID) == 0) {
+                act2.saveText(act2.PREV_IMG_ID, currentFragmentId);
             } else {
                 if (mCurImgId == 0) {
                     mCurImgId = currentFragmentId;
                 }
 
-                Activity2 act2 = (Activity2) getActivity();
+                act2 = (Activity2) getActivity();
                 ImgFragment prevFragment = act2.getPreviousFragment();
 
                 int previous_img_id;
                 if (prevFragment.mCurImgId == 0) {
-                    previous_img_id = Mover.sPrevImgID;
+                    previous_img_id = act2.loadText(act2.PREV_IMG_ID);
                 } else {
                     previous_img_id = prevFragment.mCurImgId;
                 }
@@ -79,11 +81,16 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
                 prevFragment.deselect();
                 deselect();
 
-                Mover.sMovesCount++;
-                Mover.saveToMovingHistory(Mover.sMovesCount, Mover.sPrevImgID, currentFragmentId);
+                int count = act2.loadText(act2.MOVES_COUNT);
+                act2.saveText(act2.MOVES_COUNT, ++count);
+                act2.saveToMovingHistory(
+                        act2.loadText(act2.MOVES_COUNT),
+                        act2.loadText(act2.PREV_IMG_ID),
+                        currentFragmentId
+                );
 
                 mCurImgId = previous_img_id;
-                Mover.sPrevImgID = 0;
+                act2.saveText(act2.PREV_IMG_ID, 0);
             }
         }
     }
