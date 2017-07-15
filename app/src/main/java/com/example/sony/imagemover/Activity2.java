@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,7 +15,6 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,8 +27,7 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
 
     SharedPreferences sPref;
 
-    final String PREV_IMG_ID = "prev_img_id";
-    final String MOVES_COUNT = "moves_count";
+    int mMovesCount;
     final String MOVING_HISTORY = "moving_history";
 
     @Override
@@ -88,9 +87,42 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
         });
     }
 
-    protected ImgFragment getPreviousFragment() {
-        FragmentManager mFragmentManager = getFragmentManager();
-        return (ImgFragment) mFragmentManager.findFragmentByTag(Integer.toString(loadText(PREV_IMG_ID)));
+    @Nullable
+    protected ImgFragment getSelectedFragment() {
+        for (int j = 1; j <= 6; j++) {
+            ImgFragment fragment = (ImgFragment) mFragmentManager.findFragmentByTag(Integer.toString(j));
+            if (fragment.mIsSelected) {
+                return fragment;
+            }
+        }
+        return null;
+    }
+
+    protected void swapImages(int currentFragmentId) {
+        ImgFragment selectedFragment = getSelectedFragment();
+        ImgFragment currentFragment = (ImgFragment) mFragmentManager.findFragmentByTag(Integer.toString(currentFragmentId));
+
+        int selectedImgId = selectedFragment.mCurImgId;
+        int currentImgId = currentFragment.mCurImgId;
+
+        int imgSelected = selectedFragment.getImageById(selectedImgId);
+        int imgCurrent = currentFragment.getImageById(currentImgId);
+
+        selectedFragment.mImageView.setImageResource(imgCurrent);
+        currentFragment.mImageView.setImageResource(imgSelected);
+
+        selectedFragment.mCurImgId = currentImgId;
+        currentFragment.mCurImgId = selectedImgId;
+
+        mMovesCount++;
+        System.out.println("AAAA " + mMovesCount);
+        saveToMovingHistory(
+                mMovesCount,
+                selectedFragment.getCurrentFragmentId(),
+                currentFragmentId
+        );
+
+        selectedFragment.deselect();
     }
 
     private void goToMainActivityAndShowHistory() {
@@ -98,18 +130,6 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
         intent.putExtra("history", getMovingHistory());
         setResult(RESULT_OK, intent);
         finish();
-    }
-
-    void saveText(String key, int value) {
-        sPref = getSharedPreferences("myPref", MODE_PRIVATE);
-        Editor ed = sPref.edit();
-        ed.putInt(key, value);
-        ed.apply();
-    }
-
-    int loadText(String key) {
-        sPref = getSharedPreferences("myPref", MODE_PRIVATE);
-        return sPref.getInt(key, 0);
     }
 
     void saveToMovingHistory(int movesCount, int firstFragmentId, int lastFragmentId) {
@@ -122,7 +142,7 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
                 + ", " + Integer.toString(firstFragmentId)
                 + ", " + Integer.toString(lastFragmentId)
         );
-        history = sortMovingHistory(history);
+
         Set<String> set = new HashSet<>();
         set.addAll(history);
         ed.putStringSet(MOVING_HISTORY, set);
@@ -135,12 +155,13 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
         return new ArrayList<>(set);
     }
 
-    ArrayList<String> sortMovingHistory(ArrayList<String> history) {
-        String[] tempHistory = history.toArray(new String[0]);
+// TODO: сделать так, чтобы история отображалась отсортированной
+//    ArrayList<String> sortMovingHistory(ArrayList<String> history) {
+//        String[] tempHistory = history.toArray(new String[0]);
 //        for (String item : tempHistory) {
 //            String order = StringUtils.substringBefore(item, ",");
 //        }
-        Arrays.sort(tempHistory);
-        return new ArrayList<>(Arrays.asList(tempHistory));
-    }
+//        Arrays.sort(tempHistory);
+//        return new ArrayList<>(Arrays.asList(tempHistory));
+//    }
 }

@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mTextViewHistoryOfMoves = (TextView) findViewById(R.id.log);
         mTextViewHistoryOfMoves.setMovementMethod(new ScrollingMovementMethod());
-        clearPreferences();
     }
 
     @Override
@@ -47,14 +46,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (data != null) {
             sPref = getSharedPreferences("myPref", MODE_PRIVATE);
             Set<String> set = sPref.getStringSet("moving_history", null);
-            List<String> log = new ArrayList<>(set);
-            if (log != null) {
-                for (String i : log) {
+            List<String> historyList = new ArrayList<>(set);
+            if (historyList != null) {
+                for (String i : historyList) {
                     historyInString += i + "\n";
                 }
             }
         }
         mTextViewHistoryOfMoves.setText(historyInString);
+        clearPreferences();
     }
 
     void clearPreferences() {
