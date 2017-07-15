@@ -115,7 +115,6 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
         currentFragment.mCurImgId = selectedImgId;
 
         mMovesCount++;
-        System.out.println("AAAA " + mMovesCount);
         saveToMovingHistory(
                 mMovesCount,
                 selectedFragment.getCurrentFragmentId(),
