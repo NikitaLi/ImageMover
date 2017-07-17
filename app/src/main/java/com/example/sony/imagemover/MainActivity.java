@@ -14,8 +14,11 @@ import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    
+
+    // FIXME: m не требуется в наименовании полей класса, просто btnStart
+    // FIXME: так же поле должно быть локальным
     Button mBtnStart;
+    // FIXME: 17.07.17 Поле должно быть приватным
     TextView mTextViewHistoryOfMoves;
 
     SharedPreferences sPref;
@@ -25,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // FIXME: id для элементов view должны быть названы в стиле btn_some_name или tv_some_name
         mBtnStart = (Button) findViewById(R.id.goToActivity2);
         mBtnStart.setOnClickListener(this);
 
@@ -44,9 +48,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         String historyInString = "";
         if (data != null) {
+            // FIXME: Хардкодное название SharedPreferences
             sPref = getSharedPreferences("myPref", MODE_PRIVATE);
             Set<String> set = sPref.getStringSet("moving_history", null);
+            // FIXME: set может быть null
             List<String> historyList = new ArrayList<>(set);
+            // FIXME: Проверка на null не требуется
             if (historyList != null) {
                 for (String i : historyList) {
                     historyInString += i + "\n";
@@ -58,9 +65,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     void clearPreferences() {
+        // FIXME: Хардкодное название SharedPreferences
         sPref = getSharedPreferences("myPref", MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();
         ed.clear();
         ed.apply();
+        // FIXME: Подобная запись предпочтительнее
+        // getSharedPreferences(MY_PREFERENCES, MODE_PRIVATE)
+        //        .edit()
+        //        .clear()
+        //        .apply();
     }
 }

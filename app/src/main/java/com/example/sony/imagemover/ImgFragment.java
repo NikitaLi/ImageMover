@@ -14,10 +14,12 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
 
     private final String ARG_ID = "id";
 
+    // FIXME: Поля не приватные
     boolean mIsSelected = false;
     int mCurImgId;
 
     private LinearLayout mLinearLayout;
+    // FIXME: Поле не приватное
     ImageView mImageView;
 
     public ImgFragment newInstance(int id) {
@@ -45,6 +47,8 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         Activity2 act2 = (Activity2) getActivity();
+        // FIXME: Реализацию методов getSelectedFragment и swapImages лучше вынести интерфейс,
+        // FIXME: чтобы фрагмент не знал ничего об активити и работал только с интерфейсом
         if (act2.getSelectedFragment() != null) {
             if (mIsSelected) {
                 deselect();

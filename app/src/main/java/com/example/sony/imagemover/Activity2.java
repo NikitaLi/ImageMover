@@ -20,7 +20,9 @@ import java.util.Set;
 
 public class Activity2 extends AppCompatActivity implements View.OnClickListener {
 
+    // FIXME: Поле должно быть приватным
     Spinner mSpinner;
+    // FIXME: Поле должно быть локальным
     Button mBtnStop;
 
     private FragmentManager mFragmentManager;
@@ -66,6 +68,7 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
 
         final String[] scaleTypeVariants = getResources().getStringArray(R.array.scale_type_variants);
 
+        // FIXME: Вылезать за 100 символов не лучшая идея
         ArrayAdapter<?> adapter =
                 ArrayAdapter.createFromResource(this, R.array.scale_type_variants, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -126,12 +129,14 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
 
     private void goToMainActivityAndShowHistory() {
         Intent intent = new Intent();
+        // FIXME: Хардкод
         intent.putExtra("history", getMovingHistory());
         setResult(RESULT_OK, intent);
         finish();
     }
 
     void saveToMovingHistory(int movesCount, int firstFragmentId, int lastFragmentId) {
+        // FIXME: Хардкод
         sPref = getSharedPreferences("myPref", MODE_PRIVATE);
         Editor ed = sPref.edit();
 
@@ -149,6 +154,7 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
     }
 
     ArrayList<String> getMovingHistory() {
+        // FIXME: Хардкод
         sPref = getSharedPreferences("myPref", MODE_PRIVATE);
         Set<String> set = sPref.getStringSet(MOVING_HISTORY, new HashSet<String>());
         return new ArrayList<>(set);
