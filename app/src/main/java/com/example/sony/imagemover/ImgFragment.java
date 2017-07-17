@@ -1,6 +1,7 @@
 package com.example.sony.imagemover;
 
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -12,15 +13,25 @@ import android.widget.LinearLayout;
 
 public class ImgFragment extends Fragment implements View.OnClickListener {
 
+    private LinearLayout linearLayout;
+    private ImageView imageView;
+
     private final String ARG_ID = "id";
 
-    // FIXME: Поля не приватные
-    boolean mIsSelected = false;
-    int mCurImgId;
+    private boolean isSelected = false;
 
-    private LinearLayout mLinearLayout;
-    // FIXME: Поле не приватное
-    ImageView mImageView;
+    private int curImgId;
+
+    private Listener listener;
+
+    interface Listener {
+        ImgFragment getSelectedFragment();
+        void swapImages(int currentFragmentId);
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
 
     public ImgFragment newInstance(int id) {
         ImgFragment fragment = new ImgFragment();
@@ -34,26 +45,23 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         LinearLayout inflateView = (LinearLayout) inflater.inflate(R.layout.img_fragment, container, false);
-        mLinearLayout = (LinearLayout) inflateView.findViewById(R.id.background);
+        linearLayout = (LinearLayout) inflateView.findViewById(R.id.background);
 
-        mImageView = (ImageView) inflateView.findViewById(R.id.this_image);
+        imageView = (ImageView) inflateView.findViewById(R.id.this_image);
         int img = getImageById(getCurrentFragmentId());
-        mCurImgId = getCurrentFragmentId();
-        mImageView.setImageResource(img);
-        mImageView.setOnClickListener(this);
+        setCurrentImgId(getCurrentFragmentId());
+        setImageResource(img);
+        imageView.setOnClickListener(this);
         return inflateView;
     }
 
     @Override
     public void onClick(View view) {
-        Activity2 act2 = (Activity2) getActivity();
-        // FIXME: Реализацию методов getSelectedFragment и swapImages лучше вынести интерфейс,
-        // FIXME: чтобы фрагмент не знал ничего об активити и работал только с интерфейсом
-        if (act2.getSelectedFragment() != null) {
-            if (mIsSelected) {
+        if (listener.getSelectedFragment() != null) {
+            if (isSelected) {
                 deselect();
             } else {
-                act2.swapImages(getCurrentFragmentId());
+                listener.swapImages(getCurrentFragmentId());
             }
         }
         else {
@@ -66,13 +74,17 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
     }
 
     public void select() {
-        mLinearLayout.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary));
-        mIsSelected = true;
+        linearLayout.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary));
+        isSelected = true;
     }
 
     public void deselect() {
-        mLinearLayout.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorTransparent));
-        mIsSelected = false;
+        linearLayout.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorTransparent));
+        isSelected = false;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
     }
 
     public int getImageById(int id) {
@@ -83,7 +95,19 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
                         getActivity().getPackageName());
     }
 
+    public int getCurrentImgId() {
+        return curImgId;
+    }
+
+    public void setCurrentImgId(int curImgId) {
+        this.curImgId = curImgId;
+    }
+
+    void setImageResource(@DrawableRes int resId) {
+        imageView.setImageResource(resId);
+    }
+
     public void setScaleTypeForImage(String scaleType) {
-        mImageView.setScaleType(ImageView.ScaleType.valueOf(scaleType));
+        imageView.setScaleType(ImageView.ScaleType.valueOf(scaleType));
     }
 }
