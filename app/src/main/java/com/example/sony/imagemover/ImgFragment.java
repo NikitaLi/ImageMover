@@ -14,11 +14,11 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
 
     private final String ARG_ID = "id";
 
-    private boolean mIsSelected = false;
-    int mCurImgId = 0;
+    boolean mIsSelected = false;
+    int mCurImgId;
 
     private LinearLayout mLinearLayout;
-    private ImageView mImageView;
+    ImageView mImageView;
 
     public ImgFragment newInstance(int id) {
         ImgFragment fragment = new ImgFragment();
@@ -35,56 +35,25 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
         mLinearLayout = (LinearLayout) inflateView.findViewById(R.id.background);
 
         mImageView = (ImageView) inflateView.findViewById(R.id.this_image);
-        int img = getImageByID(getCurrentFragmentId());
+        int img = getImageById(getCurrentFragmentId());
+        mCurImgId = getCurrentFragmentId();
         mImageView.setImageResource(img);
         mImageView.setOnClickListener(this);
         return inflateView;
     }
 
-    // TODO: разнести
     @Override
     public void onClick(View view) {
-
-        int currentFragmentId = getCurrentFragmentId();
-
-        if (mIsSelected) {
-            deselect();
-            Mover.sPrevImgID = 0;
-        } else {
-            select();
-            if (Mover.sPrevImgID == 0) {
-                Mover.sPrevImgID = currentFragmentId;
-            } else {
-                if (mCurImgId == 0) {
-                    mCurImgId = currentFragmentId;
-                }
-
-                Activity2 act2 = (Activity2) getActivity();
-                ImgFragment prevFragment = act2.getPreviousFragment();
-
-                int previous_img_id;
-                if (prevFragment.mCurImgId == 0) {
-                    previous_img_id = Mover.sPrevImgID;
-                } else {
-                    previous_img_id = prevFragment.mCurImgId;
-                }
-
-                int imgPrevious = getImageByID(previous_img_id);
-                int imgCurrent = getImageByID(mCurImgId);
-
-                mImageView.setImageResource(imgPrevious);
-
-                prevFragment.mImageView.setImageResource(imgCurrent);
-                prevFragment.mCurImgId = mCurImgId;
-                prevFragment.deselect();
+        Activity2 act2 = (Activity2) getActivity();
+        if (act2.getSelectedFragment() != null) {
+            if (mIsSelected) {
                 deselect();
-
-                Mover.sMovesCount++;
-                Mover.saveToMovingHistory(Mover.sMovesCount, Mover.sPrevImgID, currentFragmentId);
-
-                mCurImgId = previous_img_id;
-                Mover.sPrevImgID = 0;
+            } else {
+                act2.swapImages(getCurrentFragmentId());
             }
+        }
+        else {
+            select();
         }
     }
 
@@ -102,8 +71,7 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
         mIsSelected = false;
     }
 
-    // TODO: унести в Utils
-    public int getImageByID(int id) {
+    public int getImageById(int id) {
         return getResources()
                 .getIdentifier(
                         "img" + id,
