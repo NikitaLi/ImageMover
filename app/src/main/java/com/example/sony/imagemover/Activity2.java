@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Activity2 extends AppCompatActivity implements ImgFragment.Listener, View.OnClickListener {
+public class Activity2 extends AppCompatActivity
+        implements ImgFragment.Listener, View.OnClickListener {
 
     private Spinner spinner;
 
@@ -47,8 +48,8 @@ public class Activity2 extends AppCompatActivity implements ImgFragment.Listener
         fragmentTransaction.commit();
         fragmentManager.executePendingTransactions();
 
-        Button mBtnStop = (Button) findViewById(R.id.stop_button);
-        mBtnStop.setOnClickListener(this);
+        Button btnStop = (Button) findViewById(R.id.stop_button);
+        btnStop.setOnClickListener(this);
         setScaleType();
     }
 
@@ -64,7 +65,8 @@ public class Activity2 extends AppCompatActivity implements ImgFragment.Listener
 
     private void setScaleType() {
 
-        final String[] scaleTypeVariants = getResources().getStringArray(R.array.scale_type_variants);
+        final String[] scaleTypeVariants = getResources().getStringArray(
+                R.array.scale_type_variants);
 
         ArrayAdapter<?> adapter =
                 ArrayAdapter.createFromResource(
@@ -79,7 +81,8 @@ public class Activity2 extends AppCompatActivity implements ImgFragment.Listener
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 for (int j = 1; j <= 6; j++) {
-                    ImgFragment fragment = (ImgFragment) fragmentManager.findFragmentByTag(Integer.toString(j));
+                    ImgFragment fragment = (ImgFragment) fragmentManager.findFragmentByTag(
+                            Integer.toString(j));
                     fragment.setScaleTypeForImage(scaleTypeVariants[i]);
                 }
             }
@@ -95,7 +98,8 @@ public class Activity2 extends AppCompatActivity implements ImgFragment.Listener
     @Override
     public ImgFragment getSelectedFragment() {
         for (int j = 1; j <= 6; j++) {
-            ImgFragment fragment = (ImgFragment) fragmentManager.findFragmentByTag(Integer.toString(j));
+            ImgFragment fragment = (ImgFragment) fragmentManager.findFragmentByTag(
+                    Integer.toString(j));
             if (fragment.isSelected()) {
                 return fragment;
             }
@@ -106,7 +110,8 @@ public class Activity2 extends AppCompatActivity implements ImgFragment.Listener
     @Override
     public void swapImages(int currentFragmentId) {
         ImgFragment selectedFragment = getSelectedFragment();
-        ImgFragment currentFragment = (ImgFragment) fragmentManager.findFragmentByTag(Integer.toString(currentFragmentId));
+        ImgFragment currentFragment = (ImgFragment) fragmentManager.findFragmentByTag(
+                Integer.toString(currentFragmentId));
 
         int selectedImgId = selectedFragment.getCurrentImgId();
         int currentImgId = currentFragment.getCurrentImgId();
