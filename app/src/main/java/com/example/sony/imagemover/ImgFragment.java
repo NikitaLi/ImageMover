@@ -60,9 +60,7 @@ public class ImgFragment extends Fragment implements View.OnClickListener {
         if (listener.getSelectedFragment() != null) {
             if (isSelected) {
                 deselect();
-            } else {
-                listener.swapImages(getCurrentFragmentId());
-            }
+            } else { listener.swapImages(getCurrentFragmentId()); }
         }
         else {
             select();
