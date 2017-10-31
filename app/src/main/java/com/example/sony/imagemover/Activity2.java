@@ -18,39 +18,38 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Activity2 extends AppCompatActivity implements View.OnClickListener {
+public class Activity2 extends AppCompatActivity
+        implements ImgFragment.Listener, View.OnClickListener {
 
-    // FIXME: Поле должно быть приватным
-    Spinner mSpinner;
-    // FIXME: Поле должно быть локальным
-    Button mBtnStop;
+    private Spinner spinner;
 
-    private FragmentManager mFragmentManager;
+    private FragmentManager fragmentManager;
 
-    SharedPreferences sPref;
+    private SharedPreferences pref;
 
-    int mMovesCount;
-    final String MOVING_HISTORY = "moving_history";
+    private int movesCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_2);
 
-        mSpinner = (Spinner) findViewById(R.id.scaleTypeSpinner);
+        spinner = (Spinner) findViewById(R.id.scaleTypeSpinner);
 
-        mFragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         for (int i = 1; i <= 6; i++) {
             int resId = getResources().getIdentifier("frame" + i, "id", getPackageName());
-            fragmentTransaction.add(resId, new ImgFragment().newInstance(i), Integer.toString(i));
+            ImgFragment fragment = new ImgFragment().newInstance(i);
+            fragment.setListener(this);
+            fragmentTransaction.add(resId, fragment, Integer.toString(i));
         }
         fragmentTransaction.commit();
-        mFragmentManager.executePendingTransactions();
+        fragmentManager.executePendingTransactions();
 
-        mBtnStop = (Button) findViewById(R.id.stop_button);
-        mBtnStop.setOnClickListener(this);
+        Button btnStop = (Button) findViewById(R.id.stop_button);
+        btnStop.setOnClickListener(this);
         setScaleType();
     }
 
@@ -66,19 +65,24 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
 
     private void setScaleType() {
 
-        final String[] scaleTypeVariants = getResources().getStringArray(R.array.scale_type_variants);
+        final String[] scaleTypeVariants = getResources().getStringArray(
+                R.array.scale_type_variants);
 
-        // FIXME: Вылезать за 100 символов не лучшая идея
         ArrayAdapter<?> adapter =
-                ArrayAdapter.createFromResource(this, R.array.scale_type_variants, android.R.layout.simple_spinner_item);
+                ArrayAdapter.createFromResource(
+                        this,
+                        R.array.scale_type_variants,
+                        android.R.layout.simple_spinner_item
+                );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSpinner.setAdapter(adapter);
+        spinner.setAdapter(adapter);
 
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 for (int j = 1; j <= 6; j++) {
-                    ImgFragment fragment = (ImgFragment) mFragmentManager.findFragmentByTag(Integer.toString(j));
+                    ImgFragment fragment = (ImgFragment) fragmentManager.findFragmentByTag(
+                            Integer.toString(j));
                     fragment.setScaleTypeForImage(scaleTypeVariants[i]);
                 }
             }
@@ -91,35 +95,39 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
     }
 
     @Nullable
-    protected ImgFragment getSelectedFragment() {
+    @Override
+    public ImgFragment getSelectedFragment() {
         for (int j = 1; j <= 6; j++) {
-            ImgFragment fragment = (ImgFragment) mFragmentManager.findFragmentByTag(Integer.toString(j));
-            if (fragment.mIsSelected) {
+            ImgFragment fragment = (ImgFragment) fragmentManager.findFragmentByTag(
+                    Integer.toString(j));
+            if (fragment.isSelected()) {
                 return fragment;
             }
         }
         return null;
     }
 
-    protected void swapImages(int currentFragmentId) {
+    @Override
+    public void swapImages(int currentFragmentId) {
         ImgFragment selectedFragment = getSelectedFragment();
-        ImgFragment currentFragment = (ImgFragment) mFragmentManager.findFragmentByTag(Integer.toString(currentFragmentId));
+        ImgFragment currentFragment = (ImgFragment) fragmentManager.findFragmentByTag(
+                Integer.toString(currentFragmentId));
 
-        int selectedImgId = selectedFragment.mCurImgId;
-        int currentImgId = currentFragment.mCurImgId;
+        int selectedImgId = selectedFragment.getCurrentImgId();
+        int currentImgId = currentFragment.getCurrentImgId();
 
         int imgSelected = selectedFragment.getImageById(selectedImgId);
         int imgCurrent = currentFragment.getImageById(currentImgId);
 
-        selectedFragment.mImageView.setImageResource(imgCurrent);
-        currentFragment.mImageView.setImageResource(imgSelected);
+        selectedFragment.setImageResource(imgCurrent);
+        currentFragment.setImageResource(imgSelected);
 
-        selectedFragment.mCurImgId = currentImgId;
-        currentFragment.mCurImgId = selectedImgId;
+        selectedFragment.setCurrentImgId(currentImgId);
+        currentFragment.setCurrentImgId(selectedImgId);
 
-        mMovesCount++;
+        movesCount++;
         saveToMovingHistory(
-                mMovesCount,
+                movesCount,
                 selectedFragment.getCurrentFragmentId(),
                 currentFragmentId
         );
@@ -129,16 +137,14 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
 
     private void goToMainActivityAndShowHistory() {
         Intent intent = new Intent();
-        // FIXME: Хардкод
-        intent.putExtra("history", getMovingHistory());
+        intent.putExtra(Constants.MOVING_HISTORY, getMovingHistory());
         setResult(RESULT_OK, intent);
         finish();
     }
 
     void saveToMovingHistory(int movesCount, int firstFragmentId, int lastFragmentId) {
-        // FIXME: Хардкод
-        sPref = getSharedPreferences("myPref", MODE_PRIVATE);
-        Editor ed = sPref.edit();
+        pref = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, MODE_PRIVATE);
+        Editor ed = pref.edit();
 
         ArrayList<String> history = getMovingHistory();
         history.add(
@@ -149,14 +155,13 @@ public class Activity2 extends AppCompatActivity implements View.OnClickListener
 
         Set<String> set = new HashSet<>();
         set.addAll(history);
-        ed.putStringSet(MOVING_HISTORY, set);
-        ed.apply();
+        ed.putStringSet(Constants.MOVING_HISTORY, set)
+                .apply();
     }
 
     ArrayList<String> getMovingHistory() {
-        // FIXME: Хардкод
-        sPref = getSharedPreferences("myPref", MODE_PRIVATE);
-        Set<String> set = sPref.getStringSet(MOVING_HISTORY, new HashSet<String>());
+        pref = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, MODE_PRIVATE);
+        Set<String> set = pref.getStringSet(Constants.MOVING_HISTORY, new HashSet<String>());
         return new ArrayList<>(set);
     }
 
